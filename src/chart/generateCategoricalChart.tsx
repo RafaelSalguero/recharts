@@ -24,7 +24,7 @@ import {
 
 import CartesianAxis from '../cartesian/CartesianAxis';
 import Brush from '../cartesian/Brush';
-import { getOffset, calculateChartCoordinate } from '../util/DOMUtils';
+import { getOffset, calculateChartCoordinate, MouseEventPagePosition } from '../util/DOMUtils';
 import { getAnyElementOfObject, hasDuplicate, uniqueId, isNumber, findEntryInArray } from '../util/DataUtils';
 import {
   calculateActiveTickIndex,
@@ -300,7 +300,10 @@ const generateCategoricalChart = ({
         !shallowEqual(nextProps.margin, margin)
       ) {
         const defaultState = CategoricalChartWrapper.createDefaultState(nextProps);
-        this.setState({
+
+        //Restore mouse data in order to preserve the tooltip:
+        const mouse = this.lastMousePosition ? this.getMouseInfo(this.lastMousePosition) : null;
+        this.setState(prevState => ({
           ...defaultState,
           updateId: updateId + 1,
           ...this.updateStateOfAxisMapsOffsetAndStackGroups({
@@ -308,7 +311,8 @@ const generateCategoricalChart = ({
             ...defaultState,
             updateId: updateId + 1,
           }),
-        });
+          ...( mouse ? {... mouse, isTooltipActive: true} : {isTooltipActive: false} )
+        }));
       } else if (!isChildrenEqual(nextProps.children, children)) {
         // update configuration in chilren
         const hasGlobalData = !_.isNil(nextProps.data);
@@ -651,7 +655,7 @@ const generateCategoricalChart = ({
      * @param  {Object} event    The event object
      * @return {Object}          Mouse data
      */
-    getMouseInfo(event: any) {
+    getMouseInfo(event: MouseEventPagePosition) {
       if (!this.container) {
         return null;
       }
@@ -808,12 +812,12 @@ const generateCategoricalChart = ({
         if (componsedFn) {
           const itemEvents = isTooltipTriggerByClick
             ? {
-                onItemClick: combineEventHandlers(this.handleItemMouseEnter, null, item.props.onCLick),
-              }
+              onItemClick: combineEventHandlers(this.handleItemMouseEnter, null, item.props.onCLick),
+            }
             : {
-                onItemMouseLeave: combineEventHandlers(this.handleItemMouseLeave, null, item.props.onMouseLeave),
-                onItemMouseEnter: combineEventHandlers(this.handleItemMouseEnter, null, item.props.onMouseEnter),
-              };
+              onItemMouseLeave: combineEventHandlers(this.handleItemMouseLeave, null, item.props.onMouseLeave),
+              onItemMouseEnter: combineEventHandlers(this.handleItemMouseEnter, null, item.props.onMouseEnter),
+            };
           formatedItems.push({
             props: {
               ...componsedFn({
@@ -1188,9 +1192,9 @@ const generateCategoricalChart = ({
           const activePayload: any = this.getTooltipContent(activeTooltipIndex);
           const activeCoordinate = tooltipTicks[activeTooltipIndex]
             ? {
-                x: layout === 'horizontal' ? tooltipTicks[activeTooltipIndex].coordinate : validateChartX,
-                y: layout === 'horizontal' ? validateChartY : tooltipTicks[activeTooltipIndex].coordinate,
-              }
+              x: layout === 'horizontal' ? tooltipTicks[activeTooltipIndex].coordinate : validateChartX,
+              y: layout === 'horizontal' ? validateChartY : tooltipTicks[activeTooltipIndex].coordinate,
+            }
             : originCoordinate;
 
           this.setState({ ...data, activeLabel, activeCoordinate, activePayload });
@@ -1243,7 +1247,11 @@ const generateCategoricalChart = ({
       }
     };
 
-    triggeredAfterMouseMove = (e: any): any => {
+    //Preserve last mouse position:
+    lastMousePosition: MouseEventPagePosition | null = null;
+
+    triggeredAfterMouseMove = (e: MouseEventPagePosition): any => {
+      this.lastMousePosition = e;
       const { onMouseMove } = this.props;
       const mouse = this.getMouseInfo(e);
       const nextState: CategoricalChartState = mouse ? { ...mouse, isTooltipActive: true } : { isTooltipActive: false };

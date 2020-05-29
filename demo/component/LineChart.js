@@ -302,20 +302,20 @@ const data03 = [
 
 const series = [
   { name: 'Series 1', data: [
-    { category: 'A', value: Math.random() },
-    { category: 'B', value: Math.random() },
-    { category: 'C', value: Math.random() }
-  ] },
+      { category: 'A', value: Math.random() },
+      { category: 'B', value: Math.random() },
+      { category: 'C', value: Math.random() }
+    ] },
   { name: 'Series 2', data: [
-    { category: 'B', value: Math.random() },
-    { category: 'C', value: Math.random() },
-    { category: 'D', value: Math.random() }
-  ] },
+      { category: 'B', value: Math.random() },
+      { category: 'C', value: Math.random() },
+      { category: 'D', value: Math.random() }
+    ] },
   { name: 'Series 3', data: [
-    { category: 'C', value: Math.random() },
-    { category: 'D', value: Math.random() },
-    { category: 'E', value: Math.random() }
-  ] },
+      { category: 'C', value: Math.random() },
+      { category: 'D', value: Math.random() },
+      { category: 'E', value: Math.random() }
+    ] },
 ];
 
 const initialState = {
@@ -356,6 +356,16 @@ export default class Demo extends Component {
   static displayName = 'LineChartDemo';
 
   state = initialState;
+
+  componentDidMount() {
+    //Uncomment to test changing data:
+    //this.timer = setInterval(this.handleChangeData, 500);
+  }
+
+  componentWillUnmount() {
+    if(this.timer)
+    clearInterval(this.timer);
+  }
 
   handleChangeData = () => {
     this.setState(() => _.mapValues(initialState, changeNumberOfData));
@@ -477,7 +487,7 @@ export default class Demo extends Component {
               activeDot={{ onClick: this.handleClickDot }}
               onClick={this.handleLineClick}
             />
-            {this.state.newLine && <Line type='monotone' key={'1'} dataKey='amt' stroke='#132908' yAxisId={1} activeDot={{fill: '#132908', stroke: 'none', r: 6}}/>}
+                {this.state.newLine && <Line type='monotone' key={'1'} dataKey='amt' stroke='#132908' yAxisId={1} activeDot={{fill: '#132908', stroke: 'none', r: 6}}/>}
             <Line type='monotone' key={'2'} dataKey='pv' stroke='#387908' yAxisId={1} activeDot={{fill: '#387908', stroke: 'none', r: 6}}/>
           </LineChart>
         </div>
@@ -485,7 +495,7 @@ export default class Demo extends Component {
         <p>LineChart with three y-axes</p>
         <div className='line-chart-wrapper' style={{ margin: 40 }}>
           <LineChart width={600} height={400} data={data}>
-            <YAxis type='number' yAxisId={0} domain={[0, 1020]}/>
+          <YAxis type='number' yAxisId={0} domain={[0, 1020]}/>
             <YAxis type='number' orientation='right' yAxisId={1}/>
             <YAxis type='number' orientation='right' yAxisId={2}/>
             <XAxis dataKey='name'/>

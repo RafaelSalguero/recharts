@@ -139,13 +139,19 @@ export const getOffset = (el: HTMLElement): ContainerOffset => {
   };
 };
 
+/**The mouse page position */
+export interface MouseEventPagePosition {
+  pageX: number;
+  pageY: number;
+}
+
 /**
  * Calculate coordinate of cursor in chart
  * @param  {Object} event  Event object
  * @param  {Object} offset The offset of main part in the svg element
  * @return {Object}        {chartX, chartY}
  */
-export const calculateChartCoordinate = (event: MouseEvent, offset: ContainerOffset) => ({
+export const calculateChartCoordinate = (event: MouseEventPagePosition, offset: ContainerOffset) => ({
   chartX: Math.round(event.pageX - offset.left),
   chartY: Math.round(event.pageY - offset.top),
 });
