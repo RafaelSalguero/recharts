@@ -1306,6 +1306,7 @@ const generateCategoricalChart = ({
      * @return {Null} no return
      */
     handleMouseLeave = (e: any) => {
+      this.lastMousePosition = null;
       const { onMouseLeave } = this.props;
       const nextState = { isTooltipActive: false };
 
